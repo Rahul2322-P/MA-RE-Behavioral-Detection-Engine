@@ -1,0 +1,28 @@
+# Java / Maven build output
+backend/target/
+backend/.maven/
+*.class
+*.jar
+*.war
+
+# Node / Frontend build output
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+backend/package-lock.json
+
+# Local Windows shims
+powershell.cmd
+
+# IDE & OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

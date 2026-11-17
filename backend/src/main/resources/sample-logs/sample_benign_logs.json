@@ -1,0 +1,29 @@
+[
+  {
+    "eventId": "EVT-2001",
+    "timestamp": "2026-10-10T11:00:00",
+    "processName": "explorer.exe",
+    "parentProcessName": "userinit.exe",
+    "commandLine": "C:\\Windows\\Explorer.EXE",
+    "user": "CORP\\User1",
+    "processPath": "C:\\Windows\\explorer.exe"
+  },
+  {
+    "eventId": "EVT-2002",
+    "timestamp": "2026-10-10T11:05:00",
+    "processName": "powershell.exe",
+    "parentProcessName": "explorer.exe",
+    "commandLine": "powershell.exe Get-Process",
+    "user": "CORP\\User1",
+    "processPath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+  },
+  {
+    "eventId": "EVT-2003",
+    "timestamp": "2026-10-10T11:10:00",
+    "processName": "wmic.exe",
+    "parentProcessName": "cmd.exe",
+    "commandLine": "wmic.exe cpu get name",
+    "user": "CORP\\User1",
+    "processPath": "C:\\Windows\\System32\\wbem\\wmic.exe"
+  }
+]

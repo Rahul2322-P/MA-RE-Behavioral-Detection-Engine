@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Behavioral Detection Engine for LOLBin Attacks - Complete Capstone Guide</title>
+    <style>
+        @media print {
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
+            .container { box-shadow: none !important; border: none !important; padding: 20px 0 !important; }
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 45px 50px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .header {
+            border-bottom: 3px solid #0284c7;
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header h1 {
+            color: #0f172a;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            color: #64748b;
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .badge-academic {
+            display: inline-block;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            border: 1px solid #bae6fd;
+        }
+
+        .btn-print {
+            background-color: #0284c7;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            float: right;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-print:hover {
+            background-color: #0369a1;
+            transform: translateY(-1px);
+        }
+
+        h2 {
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-top: 35px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: #0369a1;
+            margin-top: 25px;
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: #f8fafc;
+            border-left: 5px solid #0284c7;
+            padding: 18px 22px;
+            margin: 18px 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .warning-box {
+            background: #fffbeb;
+            border-left: 5px solid #f59e0b;
+            padding: 16px 20px;
+            margin: 18px 0;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid #fde68a;
+        }
+
+        .success-box {
+            background: #f0fdf4;
+            border-left: 5px solid #22c55e;
+            padding: 16px 20px;
+            margin: 18px 0;
+            border-radius: 0 8px 8px 0;
+            border: 1px solid #bbf7d0;
+        }
+
+        .cmd-block {
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        table, th, td {
+            border: 1px solid #cbd5e1;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #0f172a;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 12px 14px;
+            vertical-align: top;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .badge-high { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+        .badge-critical { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .badge-medium { background: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+        .badge-low { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+        .script-quote {
+            background: #faf5ff;
+            border-left: 5px solid #9333ea;
+            padding: 18px 22px;
+            font-style: italic;
+            color: #4c1d95;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            border-top: 1px solid #f3e8ff;
+            border-right: 1px solid #f3e8ff;
+            border-bottom: 1px solid #f3e8ff;
+            line-height: 1.7;
+        }
+
+        ol, ul {
+            padding-left: 22px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            background: #0284c7;
+            color: white;
+            text-align: center;
+            line-height: 26px;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <button onclick="window.print()" class="btn-print no-print">🖨️ Download / Print as PDF</button>
+
+    <div class="header">
+        <span class="badge-academic">B.Tech Computer Science & Engineering Capstone Project</span>
+        <h1>Behavioral Detection Engine for Living-off-the-Land (LOLBin) Attacks</h1>
+        <p>Complete Implementation, Architecture, User Manual & Viva Voce Guide</p>
+    </div>
+
+    <!-- SECTION 1: PROBLEM STATEMENT -->
+    <h2>1. Original Problem Statement</h2>
+    <div class="highlight-box">
+        <strong>Problem Statement from Capstone Assignment:</strong><br>
+        <em>"Modern attackers increasingly abuse legitimate system tools (PowerShell, WMI, certutil) instead of dropping malware files, making traditional signature-based antivirus blind to the attack. Students must build a detection engine that identifies malicious intent from behavior patterns in logs, not file signatures."</em>
+        <br><br>
+        <strong>Objective:</strong><br>
+        <em>"Detect fileless/LOLBin-based attacks using log analysis and behavioral heuristics mapped to MITRE ATT&CK techniques."</em>
+        <br><br>
+        <strong>Expected Deliverables:</strong>
+        <ol style="margin-top: 6px; margin-bottom: 0;">
+            <li>Detection engine / backend implementation.</li>
+            <li>MITRE ATT&CK technique mapping document.</li>
+            <li>Demonstration showing detection against at least 3 simulated LOLBin attack chains.</li>
+        </ol>
+    </div>
+
+    <!-- SECTION 2: PROPOSED SOLUTION -->
+    <h2>2. Proposed Solution & Architecture</h2>
+    <p>
+        Traditional Antivirus (AV) scans binary files on disk against known malware hashes (MD5, SHA-256). However, in <strong>Living-off-the-Land (LOLBin) attacks</strong>, attackers execute code directly through legitimate, Microsoft-signed utilities:
+    </p>
+    <ul>
+        <li><code>powershell.exe</code> (PowerShell)</li>
+        <li><code>wmic.exe</code> (Windows Management Instrumentation Command-Line)</li>
+        <li><code>certutil.exe</code> (Certificate Management Utility)</li>
+    </ul>
+    <p>
+        Because these binaries are core Windows utilities, antivirus software cannot delete or quarantine them without corrupting the operating system.
+    </p>
+    <div class="success-box">
+        <strong>Our Engineered Solution:</strong>
+        <p style="margin: 6px 0 0 0;">
+            We built a <strong>Full-Stack Behavioral Detection Web Application</strong>. Instead of inspecting disk files, our Java Spring Boot detection engine evaluates <strong>process creation audit logs</strong> (command-line parameters, parent processes, execution flags) against deterministic behavioral heuristic rules. It maps matched events to standardized <strong>MITRE ATT&CK Enterprise Techniques</strong>, persists sessions in <strong>MySQL</strong> (with automated H2 in-memory fallback), and provides a clean, responsive <strong>React (Vite) Analyst Dashboard</strong>.
+        </p>
+    </div>
+
+    <!-- SECTION 3: STEP-BY-STEP RUNNING GUIDE -->
+    <h2>3. Step-by-Step Guide to Run the Project</h2>
+
+    <h3><span class="step-number">1</span> Launch the Spring Boot Backend</h3>
+    <p>Open a PowerShell window, navigate to the <code>backend</code> directory, and execute the automated launcher:</p>
+    <div class="cmd-block">
+cd "C:\Users\rahul\OneDrive\Desktop\MA & RE\backend"<br>
+.\run_backend.ps1
+    </div>
+    <div class="highlight-box">
+        <strong>Automatic Resilience:</strong> The <code>run_backend.ps1</code> script automatically checks if Apache Maven is installed (and downloads a portable version if missing). If MySQL is running on port 3306, it connects to MySQL. If MySQL is stopped, it automatically boots with embedded H2 in-memory mode so your application never crashes during a demo!
+        <br><br>
+        <strong>Success message in console:</strong><br>
+        <code>=================================================</code><br>
+        <code>  Behavioral Detection Engine Started Successfully!</code><br>
+        <code>  REST API Base URL: http://localhost:8085/api</code><br>
+        <code>=================================================</code>
+    </div>
+
+    <h3><span class="step-number">2</span> Launch the React Frontend</h3>
+    <p>Open a second PowerShell window, navigate to the <code>frontend</code> directory, and start the development server:</p>
+    <div class="cmd-block">
+cd "C:\Users\rahul\OneDrive\Desktop\MA & RE\frontend"<br>
+npm run dev
+    </div>
+    <p>Open your web browser and navigate to: <strong style="color: #0284c7;">http://localhost:5173</strong></p>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 4: TESTING & DEMONSTRATION WORKFLOW -->
+    <h2>4. How to Test & Demonstrate (Input to Output)</h2>
+    <p>Follow this exact sequence to demonstrate the working project to faculty or viva examiners:</p>
+
+    <ol>
+        <li>
+            <strong>Open Dashboard:</strong> Open <code>http://localhost:5173</code> in Google Chrome or Microsoft Edge.
+        </li>
+        <li>
+            <strong>Navigate to Upload Page:</strong> Click the <strong>Upload Logs</strong> button in the top navigation bar.
+        </li>
+        <li>
+            <strong>Choose Input File:</strong> Click <strong>Browse Log File...</strong> and select:
+            <div class="cmd-block" style="font-size: 13px;">
+C:\Users\rahul\OneDrive\Desktop\MA & RE\backend\src\main\resources\sample-logs\sample_attack_logs.json
+            </div>
+        </li>
+        <li>
+            <strong>Execute Behavioral Analysis:</strong> Click the <strong>Analyze Security Logs</strong> button.
+            <br>
+            A green confirmation box appears:
+            <ul>
+                <li><strong>Analysis Run ID:</strong> #1</li>
+                <li><strong>Events Processed:</strong> 5</li>
+                <li><strong>Alerts Triggered:</strong> 3</li>
+            </ul>
+        </li>
+        <li>
+            <strong>View Security Alerts:</strong> Click <strong>View Detailed Alerts &rarr;</strong> or click the <strong>Security Alerts</strong> tab.
+        </li>
+        <li>
+            <strong>Inspect Attack Chains:</strong> Click the <strong>Inspect</strong> button on each row to open the forensic modal popup displaying the raw command line, detection heuristics, and MITRE technique.
+        </li>
+        <li>
+            <strong>Interactive Status Update:</strong> Change the investigation status dropdown from <code>NEW</code> to <code>INVESTIGATING</code> or <code>RESOLVED</code> to show state persistence.
+        </li>
+        <li>
+            <strong>Filter by Severity:</strong> Select <code>CRITICAL</code> from the severity filter dropdown to show only the WMI ransomware backup deletion alert.
+        </li>
+        <li>
+            <strong>Verify Dashboard Analytics:</strong> Return to the <strong>Dashboard</strong> tab. The metrics cards will now show real counts: Total Analyses = 1, Events Processed = 5, Alerts Generated = 3, Critical = 1.
+        </li>
+    </ol>
+
+    <!-- SECTION 5: THE THREE SIMULATED SCENARIOS -->
+    <h2>5. The Three Required Simulated Attack Chains</h2>
+    <p>Our detection engine evaluates the log records against the following 3 concrete LOLBin attack chains:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 22%;">Scenario & Tool</th>
+                <th style="width: 18%;">Matched Rule</th>
+                <th style="width: 12%;">Severity</th>
+                <th style="width: 22%;">MITRE ATT&CK Mapping</th>
+                <th style="width: 26%;">Behavioral Heuristics Trigger</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <strong>Scenario A:</strong><br>
+                    PowerShell Evasion<br>
+                    <code>powershell.exe</code>
+                </td>
+                <td><code>RULE-PS-001</code></td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>
+                    <strong>T1059.001:</strong> PowerShell<br>
+                    <strong>T1027:</strong> Obfuscated Files
+                </td>
+                <td>
+                    Detects execution policy bypass, hidden window styles, and Base64 encoded payload strings (<code>-EncodedCommand</code>).
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <strong>Scenario B:</strong><br>
+                    WMI Backup Deletion<br>
+                    <code>wmic.exe</code>
+                </td>
+                <td><code>RULE-WMI-001</code></td>
+                <td><span class="badge badge-critical">CRITICAL</span></td>
+                <td>
+                    <strong>T1047:</strong> WMI<br>
+                    <strong>T1490:</strong> Inhibit Recovery
+                </td>
+                <td>
+                    Detects <code>shadowcopy delete</code> commands typically executed by ransomware prior to file encryption.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <strong>Scenario C:</strong><br>
+                    Certutil Payload Ingress<br>
+                    <code>certutil.exe</code>
+                </td>
+                <td><code>RULE-CERT-001</code></td>
+                <td><span class="badge badge-high">HIGH</span></td>
+                <td>
+                    <strong>T1105:</strong> Ingress Transfer<br>
+                    <strong>T1140:</strong> Deobfuscate / Decode
+                </td>
+                <td>
+                    Detects <code>-urlcache -split -f</code> web download abuse or <code>-decode</code> parameters to drop external files.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- SECTION 6: FACULTY PRESENTATION & VIVA SCRIPT -->
+    <h2>6. Word-for-Word Faculty Presentation Script</h2>
+    <p>Read or adapt this script when introducing your project during the viva voce or practical demonstration:</p>
+
+    <div class="script-quote">
+        "Respected examiners and faculty members, good morning. My capstone project is titled <strong>'Behavioral Detection Engine for Living-off-the-Land Attacks'</strong>.<br><br>
+        In modern cybersecurity, threat actors rarely write obvious malware binaries to disk because traditional antivirus software detects them via static signatures and file hashes. Instead, attackers perform <em>Living-off-the-Land</em> attacks by abusing legitimate Microsoft Windows administration binaries such as PowerShell, WMI, and Certutil. Because these utilities are digitally signed by Microsoft, signature-based antivirus cannot block or quarantine them without disrupting system administration.<br><br>
+        To solve this vulnerability, our system implements a behavioral detection engine built on Java Spring Boot 3, MySQL, and React. Instead of inspecting file hashes, our engine ingests process creation event logs and evaluates command-line arguments and flags against heuristic rules. We have mapped every detection to standardized MITRE ATT&CK techniques such as T1059.001 for PowerShell and T1490 for Inhibit System Recovery. The system provides persistent session auditing in MySQL and presents real-time alerts through an interactive React dashboard."
+    </div>
+
+    <!-- SECTION 7: VIVA VOCE QUESTIONS & ANSWERS -->
+    <h2>7. Top Viva Voce Questions & Answers</h2>
+
+    <h3>Q1: What is a Living-off-the-Land Binary (LOLBin)?</h3>
+    <p><strong>Answer:</strong> A LOLBin is a legitimate, pre-installed operating system utility (e.g., <code>powershell.exe</code>, <code>wmic.exe</code>, <code>certutil.exe</code>) that has legitimate administrative purposes but can be abused by adversaries to execute malicious actions, evade antivirus, or download secondary payloads without introducing untrusted binaries.</p>
+
+    <h3>Q2: Why does signature-based antivirus fail against fileless attacks?</h3>
+    <p><strong>Answer:</strong> Signature-based antivirus checks file hashes (MD5, SHA-256) on disk. In a fileless attack, the executable being launched is the authentic, Microsoft-signed binary. The binary's hash is completely clean, so traditional antivirus scanners have no malicious file to block.</p>
+
+    <h3>Q3: How do your detection rules prevent false positives on legitimate admin commands?</h3>
+    <p><strong>Answer:</strong> The engine does not flag a process simply because of its executable name. It requires specific combinations of behavioral evasion parameters. For instance, standard commands like <code>powershell.exe Get-Process</code> contain no stealth flags and produce zero alerts. Only anomalous combinations (such as <code>-ExecutionPolicy Bypass</code> combined with <code>-WindowStyle Hidden</code> and <code>-EncodedCommand</code>) trigger high-severity alerts.</p>
+
+    <h3>Q4: What is the MITRE ATT&CK framework and why is it mapped?</h3>
+    <p><strong>Answer:</strong> MITRE ATT&CK is a globally recognized knowledge base of adversary tactics and techniques based on real-world threat observations. Mapping our detections to MITRE technique IDs provides Security Operations Center (SOC) analysts with standardized threat intelligence context regarding the attacker's tactical objectives.</p>
+
+    <div style="margin-top: 40px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; color: #94a3b8; font-size: 13px;">
+        Behavioral Detection Engine for LOLBin Attacks &copy; 2026 | Complete B.Tech Capstone Project Manual
+    </div>
+
+</div>
+
+</body>
+</html>
