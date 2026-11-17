@@ -24,5 +24,11 @@ powershell.cmd
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
+# Local report images and temp scripts
+*.png
+build_word_document.js
+create_diagrams.ps1
+create_figures.ps1
+*.docx
+test*
+{
