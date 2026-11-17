@@ -24,11 +24,13 @@ powershell.cmd
 .DS_Store
 Thumbs.db
 
-# Local report images and temp scripts
+# Local report documents & temp scripts (kept on desktop, not in git)
 *.png
+*.docx
+PROJECT_REPORT.md
 build_word_document.js
 create_diagrams.ps1
 create_figures.ps1
-*.docx
 test*
 {
+*.log
